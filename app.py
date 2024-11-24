@@ -6,7 +6,7 @@ import os
 
 # Instantiation
 app = Flask(__name__, static_folder="build")  # La carpeta 'build' se servirá como estática
-app.config['MONGO_URI'] = 'mongodb://localhost/pythonreact'
+app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 mongo = PyMongo(app)
 
 # Settings
