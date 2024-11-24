@@ -5,8 +5,8 @@ from bson import ObjectId
 import os
 
 # Instantiation
-app = Flask(__name__, static_folder="build")  # La carpeta 'build' se servirá como estática
-app.config['MONGO_URI'] = os.getenv('MONGO_URI')
+app = Flask(__name__, static_folder="build")
+app.config['MONGO_URI'] = os.getenv('MONGO_URI')  # Variable de entorno para MongoDB
 mongo = PyMongo(app)
 
 # Settings
@@ -18,7 +18,6 @@ db = mongo.db.pythonreact
 # Routes
 @app.route('/users', methods=['POST'])
 def createUser():
-    print(request.json)
     result = db.insert_one({
         'name': request.json['name'],
         'email': request.json['email'],
@@ -55,7 +54,6 @@ def deleteUser(id):
 
 @app.route('/users/<id>', methods=['PUT'])
 def updateUser(id):
-    print(request.json)
     db.update_one({'_id': ObjectId(id)}, {"$set": {
         'name': request.json['name'],
         'email': request.json['email'],
@@ -72,7 +70,17 @@ def serve_frontend(path):
     else:
         return send_from_directory(app.static_folder, "index.html")
 
+# Error Handling
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({"error": "Server Error"}), 500
+
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({"error": "Not Found"}), 404
+
 # Main entry point
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    app.run(debug=False, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+
 
